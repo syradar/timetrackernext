@@ -1,0 +1,23 @@
+meta {
+  name: Create
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://localhost:7228/api/time-entries
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "description": "test",
+    "hours": 8.5,
+    "tags": [
+      "web",
+      "vue"
+    ],
+    "date": "2025-04-20"
+  }
+}

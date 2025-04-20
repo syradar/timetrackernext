@@ -1,0 +1,80 @@
+# Ignore build output directories
+**/bin/
+**/obj/
+
+# Rider project files
+.idea/
+*.sln.iml
+riderModule.iml
+/_ReSharper.Caches/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio cache/options folders
+.vs/
+.vscode/
+
+# Resharper
+_ReSharper*/
+*.DotSettings.user
+
+# NCrunch
+*.ncrunch*
+
+# Coverlet coverage files
+coverage.opencover.xml
+coverage.*.json
+
+# DotCover
+*.dotCover
+
+# NuGet
+*.nupkg
+# The packages folder can be ignored because of Package Restore
+**/packages/
+# NuGet v3
+project.lock.json
+project.fragment.lock.json
+
+# Azure Build Artifacts
+csx/
+*.build.csdef
+
+# StyleCop
+.stylecop
+stylecop.json
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# macOS files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two carriage returns
+Icon
+
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+
+# Directories potentially created on network shares
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
