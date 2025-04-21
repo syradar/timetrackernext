@@ -1,0 +1,22 @@
+meta {
+  name: Update
+  type: http
+  seq: 4
+}
+
+put {
+  url: https://localhost:7228/api/clients/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "description": "david",
+    "hours": 8,
+    "tags": [
+      "vue"
+    ],
+    "date": "2025-04-20"
+  }
+}

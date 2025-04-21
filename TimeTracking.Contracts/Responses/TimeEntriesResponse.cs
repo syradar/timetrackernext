@@ -1,4 +1,4 @@
-namespace TimeTracking.Contracts.Requests;
+namespace TimeTracking.Contracts.Responses;
 
 public class TimeEntriesResponse
 {

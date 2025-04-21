@@ -22,7 +22,7 @@ public class TimeEntriesController : ControllerBase
 
         await _timeEntryRepository.CreateAsync(timeEntry);
 
-        return CreatedAtAction(nameof(Get), new { id = timeEntry.Id }, timeEntry);
+        return CreatedAtAction(nameof(Get), new { id = timeEntry.Id }, timeEntry.MapToResponse());
     }
 
     [HttpGet(ApiEndpoints.TimeEntries.Get)]

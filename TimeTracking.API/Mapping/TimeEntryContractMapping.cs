@@ -1,9 +1,10 @@
 using TimeTracking.Application.Models;
 using TimeTracking.Contracts.Requests;
+using TimeTracking.Contracts.Responses;
 
 namespace TimeTracking.API.Mapping;
 
-public static class ContractMapping
+public static partial class TimeEntryContractMapping
 {
     public static TimeEntry MapToTimeEntry(this CreateTimeEntryRequest request)
     {
@@ -36,7 +37,8 @@ public static class ContractMapping
             Id = entry.Id,
             Description = entry.Description,
             Hours = entry.Hours,
-            Tags = entry.Tags
+            Tags = entry.Tags,
+            Date = entry.Date
         };
     }
 
