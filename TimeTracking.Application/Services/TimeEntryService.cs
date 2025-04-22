@@ -15,38 +15,38 @@ public class TimeEntryService : ITimeEntryService
         _timeEntryValidator = timeEntryValidator;
     }
 
-    public async Task<bool> CreateAsync(TimeEntry entry)
+    public async Task<bool> CreateAsync(TimeEntry entry, CancellationToken token = default)
     {
-        await _timeEntryValidator.ValidateAndThrowAsync(entry);
-        return await _timeEntryRepository.CreateAsync(entry);
+        await _timeEntryValidator.ValidateAndThrowAsync(entry, token);
+        return await _timeEntryRepository.CreateAsync(entry, token);
     }
 
-    public Task<TimeEntry?> GetByIdAsync(Guid id)
+    public Task<TimeEntry?> GetByIdAsync(Guid id, CancellationToken token = default)
     {
-        return _timeEntryRepository.GetByIdAsync(id);
+        return _timeEntryRepository.GetByIdAsync(id, token);
     }
 
-    public Task<IEnumerable<TimeEntry>> GetAllAsync()
+    public async Task<TimeEntry?> UpdateAsync(TimeEntry entry, CancellationToken token = default)
     {
-        return _timeEntryRepository.GetAllAsync();
-    }
-
-    public async Task<TimeEntry?> UpdateAsync(TimeEntry entry)
-    {
-        await _timeEntryValidator.ValidateAndThrowAsync(entry);
-        var timeEntryExists = await _timeEntryRepository.ExistsByIdAsync(entry.Id);
+        await _timeEntryValidator.ValidateAndThrowAsync(entry, token);
+        var timeEntryExists = await _timeEntryRepository.ExistsByIdAsync(entry.Id, token);
 
         if (!timeEntryExists)
         {
             return null;
         }
 
-        await _timeEntryRepository.UpdateAsync(entry);
+        await _timeEntryRepository.UpdateAsync(entry, token);
         return entry;
     }
 
-    public Task<bool> DeleteByIdAsync(Guid id)
+    public Task<bool> DeleteByIdAsync(Guid id, CancellationToken token = default)
     {
-        return _timeEntryRepository.DeleteByIdAsync(id);
+        return _timeEntryRepository.DeleteByIdAsync(id, token);
+    }
+
+    public Task<IEnumerable<TimeEntry>> GetAllAsync(CancellationToken token = default)
+    {
+        return _timeEntryRepository.GetAllAsync(token);
     }
 }

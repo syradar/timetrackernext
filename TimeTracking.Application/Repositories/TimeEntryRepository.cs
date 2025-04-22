@@ -13,16 +13,16 @@ public class TimeEntryRepository : ITimeEntryRepository
         _dbConnectionFactory = dbConnectionFactory;
     }
 
-    public async Task<bool> CreateAsync(TimeEntry entry)
+    public async Task<bool> CreateAsync(TimeEntry entry, CancellationToken token = default)
     {
-        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync(token);
         using var transaction = connection.BeginTransaction();
 
         var result = await connection.ExecuteAsync(new CommandDefinition(
             """
             insert into time_entries (id, description, date, hours)
             values (@Id, @Description, @Date, @Hours)
-            """, entry));
+            """, entry, cancellationToken: token));
 
         if (result > 0)
         {
@@ -32,7 +32,7 @@ public class TimeEntryRepository : ITimeEntryRepository
                     """
                     insert into comments (timeEntryId, comment)
                     values (@TimeEntryId, @Comment)
-                    """, new { TimeEntryId = entry.Id, comment }));
+                    """, new { TimeEntryId = entry.Id, comment }, cancellationToken: token));
             }
         }
 
@@ -41,15 +41,15 @@ public class TimeEntryRepository : ITimeEntryRepository
         return result > 0;
     }
 
-    public async Task<TimeEntry?> GetByIdAsync(Guid id)
+    public async Task<TimeEntry?> GetByIdAsync(Guid id, CancellationToken token = default)
     {
-        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync(token);
 
         var timeEntry = await connection.QuerySingleOrDefaultAsync<TimeEntry>(
             new CommandDefinition(
                 """
                 select * from time_entries where id = @id
-                """, new { id }));
+                """, new { id }, cancellationToken: token));
 
         if (timeEntry is null)
         {
@@ -60,16 +60,76 @@ public class TimeEntryRepository : ITimeEntryRepository
             new CommandDefinition(
                 """
                 select comment from comments where timeEntryId = @id
-                """, new { id }));
+                """, new { id }, cancellationToken: token));
 
         timeEntry.Comments.AddRange(comments);
 
         return timeEntry;
     }
 
-    public async Task<IEnumerable<TimeEntry>> GetAllAsync()
+    public async Task<bool> UpdateAsync(TimeEntry entry, CancellationToken token = default)
     {
-        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync(token);
+        using var transaction = connection.BeginTransaction();
+
+        await connection.ExecuteAsync(new CommandDefinition(
+            """
+            delete from comments where timeEntryId = @id
+            """, new { id = entry.Id }, cancellationToken: token));
+
+        foreach (var comment in entry.Comments)
+        {
+            await connection.ExecuteAsync(new CommandDefinition(
+                """
+                insert into comments (timeEntryId, comment)
+                values (@TimeEntryId, @Comment)
+                """, new { TimeEntryId = entry.Id, comment }, cancellationToken: token));
+        }
+
+        var result = await connection.ExecuteAsync(new CommandDefinition(
+            """
+            update time_entries set description = @Description, date = @Date, hours = @Hours
+            where id = @Id
+            """, entry, cancellationToken: token));
+
+        transaction.Commit();
+        return result > 0;
+    }
+
+    public async Task<bool> DeleteByIdAsync(Guid id, CancellationToken token = default)
+    {
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync(token);
+        using var transaction = connection.BeginTransaction();
+
+
+        await connection.ExecuteAsync(new CommandDefinition(
+            """
+            delete from comments where timeEntryId = @id
+            """, new { id }, cancellationToken: token));
+
+        var result = await connection.ExecuteAsync(new CommandDefinition(
+            """
+            delete from time_entries where id = @id
+            """, new { id }, cancellationToken: token));
+
+        transaction.Commit();
+
+        return result > 0;
+    }
+
+    public async Task<bool> ExistsByIdAsync(Guid id, CancellationToken token = default)
+    {
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync(token);
+
+        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
+            """
+            select count(1) from time_entries where id = @id
+            """, new { id }, cancellationToken: token));
+    }
+
+    public async Task<IEnumerable<TimeEntry>> GetAllAsync(CancellationToken token = default)
+    {
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync(token);
 
         var results = await connection.QueryAsync(
             new CommandDefinition(
@@ -77,7 +137,7 @@ public class TimeEntryRepository : ITimeEntryRepository
                 select te.*, string_agg(c.comment, ',') as comments
                 from time_entries te left join comments c on te.id = c.timeEntryId
                 group by id
-                """));
+                """, cancellationToken: token));
 
         return results.Select(x => new TimeEntry
         {
@@ -87,65 +147,5 @@ public class TimeEntryRepository : ITimeEntryRepository
             Comments = Enumerable.ToList(x.comments.Split(',')),
             Date = x.date,
         });
-    }
-
-    public async Task<bool> UpdateAsync(TimeEntry entry)
-    {
-        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
-        using var transaction = connection.BeginTransaction();
-
-        await connection.ExecuteAsync(new CommandDefinition(
-            """
-            delete from comments where timeEntryId = @id
-            """, new { id = entry.Id }));
-
-        foreach (var comment in entry.Comments)
-        {
-            await connection.ExecuteAsync(new CommandDefinition(
-                """
-                insert into comments (timeEntryId, comment)
-                values (@TimeEntryId, @Comment)
-                """, new { TimeEntryId = entry.Id, comment }));
-        }
-
-        var result = await connection.ExecuteAsync(new CommandDefinition(
-            """
-            update time_entries set description = @Description, date = @Date, hours = @Hours
-            where id = @Id
-            """, entry));
-
-        transaction.Commit();
-        return result > 0;
-    }
-
-    public async Task<bool> DeleteByIdAsync(Guid id)
-    {
-        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
-        using var transaction = connection.BeginTransaction();
-
-
-        await connection.ExecuteAsync(new CommandDefinition(
-            """
-            delete from comments where timeEntryId = @id
-            """, new { id }));
-
-        var result = await connection.ExecuteAsync(new CommandDefinition(
-            """
-            delete from time_entries where id = @id
-            """, new { id }));
-
-        transaction.Commit();
-
-        return result > 0;
-    }
-
-    public async Task<bool> ExistsByIdAsync(Guid id)
-    {
-        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
-
-        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
-            """
-            select count(1) from time_entries where id = @id
-            """, new { id }));
     }
 }

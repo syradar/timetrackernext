@@ -15,30 +15,30 @@ public class ClientService : IClientService
         _clientValidator = clientValidator;
     }
 
-    public async Task<bool> CreateAsync(Client client)
+    public async Task<bool> CreateAsync(Client client, CancellationToken token = default)
     {
-        await _clientValidator.ValidateAndThrowAsync(client);
+        await _clientValidator.ValidateAndThrowAsync(client, token);
         return await _clientRepository.CreateAsync(client);
     }
 
-    public Task<Client?> GetByIdAsync(Guid id)
+    public Task<Client?> GetByIdAsync(Guid id, CancellationToken token = default)
     {
         return _clientRepository.GetByIdAsync(id);
     }
 
-    public Task<Client?> GetBySlugAsync(string slug)
+    public Task<Client?> GetBySlugAsync(string slug, CancellationToken token = default)
     {
         return _clientRepository.GetBySlugAsync(slug);
     }
 
-    public Task<IEnumerable<Client>> GetAllAsync()
+    public Task<IEnumerable<Client>> GetAllAsync(CancellationToken token = default)
     {
         return _clientRepository.GetAllAsync();
     }
 
-    public async Task<Client?> UpdateAsync(Client client)
+    public async Task<Client?> UpdateAsync(Client client, CancellationToken token = default)
     {
-        await _clientValidator.ValidateAndThrowAsync(client);
+        await _clientValidator.ValidateAndThrowAsync(client, token);
         var clientExists = await _clientRepository.ExistsByIdAsync(client.Id);
 
         if (!clientExists)
@@ -49,7 +49,7 @@ public class ClientService : IClientService
         return client;
     }
 
-    public Task<bool> DeleteByIdAsync(Guid id)
+    public Task<bool> DeleteByIdAsync(Guid id, CancellationToken token = default)
     {
         return _clientRepository.DeleteByIdAsync(id);
     }

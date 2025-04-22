@@ -4,17 +4,17 @@ namespace TimeTracking.Application.Repositories;
 
 public interface IClientRepository
 {
-    Task<bool> CreateAsync(Client client);
+    Task<bool> CreateAsync(Client client, CancellationToken token = default);
 
-    Task<Client?> GetByIdAsync(Guid id);
+    Task<Client?> GetByIdAsync(Guid id, CancellationToken token = default);
 
-    Task<Client?> GetBySlugAsync(string slug);
+    Task<Client?> GetBySlugAsync(string slug, CancellationToken token = default);
 
-    Task<IEnumerable<Client>> GetAllAsync();
+    Task<IEnumerable<Client>> GetAllAsync(CancellationToken token = default);
 
-    Task<bool> UpdateAsync(Client client);
+    Task<bool> UpdateAsync(Client client, CancellationToken token = default);
 
-    Task<bool> DeleteByIdAsync(Guid id);
+    Task<bool> DeleteByIdAsync(Guid id, CancellationToken token = default);
 
-    Task<bool> ExistsByIdAsync(Guid id);
+    Task<bool> ExistsByIdAsync(Guid id, CancellationToken token = default);
 }

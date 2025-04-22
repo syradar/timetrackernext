@@ -16,19 +16,19 @@ public class TimeEntriesController : ControllerBase
     }
 
     [HttpPost(ApiEndpoints.TimeEntries.Create)]
-    public async Task<IActionResult> Create([FromBody] CreateTimeEntryRequest request)
+    public async Task<IActionResult> Create([FromBody] CreateTimeEntryRequest request, CancellationToken token)
     {
         var timeEntry = request.MapToTimeEntry();
 
-        await _timeEntryService.CreateAsync(timeEntry);
+        await _timeEntryService.CreateAsync(timeEntry, token);
 
         return CreatedAtAction(nameof(Get), new { id = timeEntry.Id }, timeEntry.MapToResponse());
     }
 
     [HttpGet(ApiEndpoints.TimeEntries.Get)]
-    public async Task<IActionResult> Get([FromRoute] Guid id)
+    public async Task<IActionResult> Get([FromRoute] Guid id, CancellationToken token)
     {
-        var timeEntry = await _timeEntryService.GetByIdAsync(id);
+        var timeEntry = await _timeEntryService.GetByIdAsync(id, token);
 
         if (timeEntry is null)
         {
@@ -40,19 +40,20 @@ public class TimeEntriesController : ControllerBase
     }
 
     [HttpGet(ApiEndpoints.TimeEntries.GetAll)]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(CancellationToken token)
     {
-        var timeEntries = await _timeEntryService.GetAllAsync();
+        var timeEntries = await _timeEntryService.GetAllAsync(token);
         var response = timeEntries.MapToResponse();
         return Ok(response);
     }
 
     [HttpPut(ApiEndpoints.TimeEntries.Update)]
-    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateTimeEntryRequest request)
+    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateTimeEntryRequest request,
+        CancellationToken token)
     {
         var timeEntry = request.MapToTimeEntry(id);
 
-        var updatedTimeEntry = await _timeEntryService.UpdateAsync(timeEntry);
+        var updatedTimeEntry = await _timeEntryService.UpdateAsync(timeEntry, token);
 
         if (updatedTimeEntry is null)
         {
@@ -65,9 +66,9 @@ public class TimeEntriesController : ControllerBase
     }
 
     [HttpDelete(ApiEndpoints.TimeEntries.Delete)]
-    public async Task<IActionResult> Delete([FromRoute] Guid id)
+    public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken token)
     {
-        var deleted = await _timeEntryService.DeleteByIdAsync(id);
+        var deleted = await _timeEntryService.DeleteByIdAsync(id, token);
 
         if (!deleted)
         {
