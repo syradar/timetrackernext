@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using TimeTracking.API.Mapping;
-using TimeTracking.Application.Repositories;
+using TimeTracking.Application.Services;
 using TimeTracking.Contracts.Requests;
 
 namespace TimeTracking.API.Controllers;
@@ -8,11 +8,11 @@ namespace TimeTracking.API.Controllers;
 [ApiController]
 public class TimeEntriesController : ControllerBase
 {
-    private readonly ITimeEntryRepository _timeEntryRepository;
+    private readonly ITimeEntryService _timeEntryService;
 
-    public TimeEntriesController(ITimeEntryRepository timeEntryRepository)
+    public TimeEntriesController(ITimeEntryService timeEntryService)
     {
-        _timeEntryRepository = timeEntryRepository;
+        _timeEntryService = timeEntryService;
     }
 
     [HttpPost(ApiEndpoints.TimeEntries.Create)]
@@ -20,7 +20,7 @@ public class TimeEntriesController : ControllerBase
     {
         var timeEntry = request.MapToTimeEntry();
 
-        await _timeEntryRepository.CreateAsync(timeEntry);
+        await _timeEntryService.CreateAsync(timeEntry);
 
         return CreatedAtAction(nameof(Get), new { id = timeEntry.Id }, timeEntry.MapToResponse());
     }
@@ -28,7 +28,7 @@ public class TimeEntriesController : ControllerBase
     [HttpGet(ApiEndpoints.TimeEntries.Get)]
     public async Task<IActionResult> Get([FromRoute] Guid id)
     {
-        var timeEntry = await _timeEntryRepository.GetByIdAsync(id);
+        var timeEntry = await _timeEntryService.GetByIdAsync(id);
 
         if (timeEntry is null)
         {
@@ -42,7 +42,7 @@ public class TimeEntriesController : ControllerBase
     [HttpGet(ApiEndpoints.TimeEntries.GetAll)]
     public async Task<IActionResult> GetAll()
     {
-        var timeEntries = await _timeEntryRepository.GetAllAsync();
+        var timeEntries = await _timeEntryService.GetAllAsync();
         var response = timeEntries.MapToResponse();
         return Ok(response);
     }
@@ -52,9 +52,9 @@ public class TimeEntriesController : ControllerBase
     {
         var timeEntry = request.MapToTimeEntry(id);
 
-        var updated = await _timeEntryRepository.UpdateAsync(timeEntry);
+        var updatedTimeEntry = await _timeEntryService.UpdateAsync(timeEntry);
 
-        if (!updated)
+        if (updatedTimeEntry is null)
         {
             return NotFound();
         }
@@ -67,7 +67,7 @@ public class TimeEntriesController : ControllerBase
     [HttpDelete(ApiEndpoints.TimeEntries.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id)
     {
-        var deleted = await _timeEntryRepository.DeleteByIdAsync(id);
+        var deleted = await _timeEntryService.DeleteByIdAsync(id);
 
         if (!deleted)
         {

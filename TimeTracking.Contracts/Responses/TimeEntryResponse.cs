@@ -10,5 +10,5 @@ public class TimeEntryResponse
 
     public required decimal Hours { get; init; }
 
-    public required IEnumerable<string> Tags { get; init; } = [];
+    public required IEnumerable<string> Comments { get; init; } = [];
 }

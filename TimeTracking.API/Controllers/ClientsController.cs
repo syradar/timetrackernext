@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using TimeTracking.API.Mapping;
-using TimeTracking.Application.Repositories;
+using TimeTracking.Application.Services;
 using TimeTracking.Contracts.Requests;
 
 namespace TimeTracking.API.Controllers;
@@ -8,18 +8,18 @@ namespace TimeTracking.API.Controllers;
 [ApiController]
 public class ClientsController : ControllerBase
 {
-    private readonly IClientRepository _clientRepo;
+    private readonly IClientService _clientService;
 
-    public ClientsController(IClientRepository clientRepo)
+    public ClientsController(IClientService clientService)
     {
-        _clientRepo = clientRepo;
+        _clientService = clientService;
     }
 
     [HttpPost(ApiEndpoints.Clients.Create)]
     public async Task<IActionResult> Create([FromBody] CreateClientRequest request)
     {
         var client = request.MapToClient();
-        await _clientRepo.CreateAsync(client);
+        await _clientService.CreateAsync(client);
         return CreatedAtAction(nameof(Get), new { idOrSlug = client.Id }, client.MapToResponse());
     }
 
@@ -27,8 +27,8 @@ public class ClientsController : ControllerBase
     public async Task<IActionResult> Get([FromRoute] string idOrSlug)
     {
         var client = Guid.TryParse(idOrSlug, out var guid)
-            ? await _clientRepo.GetByIdAsync(guid)
-            : await _clientRepo.GetBySlugAsync(idOrSlug);
+            ? await _clientService.GetByIdAsync(guid)
+            : await _clientService.GetBySlugAsync(idOrSlug);
 
         if (client is null)
         {
@@ -41,7 +41,7 @@ public class ClientsController : ControllerBase
     [HttpGet(ApiEndpoints.Clients.GetAll)]
     public async Task<IActionResult> GetAll()
     {
-        var clients = await _clientRepo.GetAllAsync();
+        var clients = await _clientService.GetAllAsync();
         return Ok(clients.MapToResponse());
     }
 
@@ -51,9 +51,9 @@ public class ClientsController : ControllerBase
         [FromBody] UpdateClientRequest request)
     {
         var client = request.MapToClient(id);
-        var updated = await _clientRepo.UpdateAsync(client);
+        var updatedClient = await _clientService.UpdateAsync(client);
 
-        if (!updated)
+        if (updatedClient is null)
         {
             return NotFound();
         }
@@ -64,7 +64,7 @@ public class ClientsController : ControllerBase
     [HttpDelete(ApiEndpoints.Clients.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id)
     {
-        var deleted = await _clientRepo.DeleteByIdAsync(id);
+        var deleted = await _clientService.DeleteByIdAsync(id);
 
         if (!deleted)
         {

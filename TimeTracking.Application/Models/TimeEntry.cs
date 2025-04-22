@@ -10,5 +10,5 @@ public class TimeEntry
 
     public required decimal Hours { get; set; }
 
-    public required List<string> Tags { get; init; } = [];
+    public required List<string> Comments { get; init; } = [];
 }

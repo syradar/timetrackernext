@@ -13,8 +13,8 @@ public static partial class TimeEntryContractMapping
             Date = request.Date,
             Description = request.Description,
             Hours = request.Hours,
-            Tags = request.Tags.ToList(),
-            Id = Guid.NewGuid()
+            Comments = request.Comments.ToList(),
+            Id = Guid.NewGuid(),
         };
     }
 
@@ -25,8 +25,8 @@ public static partial class TimeEntryContractMapping
             Date = request.Date,
             Description = request.Description,
             Hours = request.Hours,
-            Tags = request.Tags.ToList(),
-            Id = id
+            Comments = request.Comments.ToList(),
+            Id = id,
         };
     }
 
@@ -37,8 +37,8 @@ public static partial class TimeEntryContractMapping
             Id = entry.Id,
             Description = entry.Description,
             Hours = entry.Hours,
-            Tags = entry.Tags,
-            Date = entry.Date
+            Comments = entry.Comments,
+            Date = entry.Date,
         };
     }
 
@@ -46,7 +46,7 @@ public static partial class TimeEntryContractMapping
     {
         return new TimeEntriesResponse
         {
-            Items = entries.Select(x => x.MapToResponse())
+            Items = entries.Select(x => x.MapToResponse()),
         };
     }
 }

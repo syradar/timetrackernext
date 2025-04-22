@@ -1,50 +1,111 @@
+using Dapper;
+using TimeTracking.Application.Database;
 using TimeTracking.Application.Models;
 
 namespace TimeTracking.Application.Repositories;
 
 public class ClientRepository : IClientRepository
 {
-    private readonly List<Client> _clients = new();
+    private readonly IDbConnectionFactory _dbConnectionFactory;
 
-    public Task<bool> CreateAsync(Client client)
+    public ClientRepository(IDbConnectionFactory dbConnectionFactory)
     {
-        _clients.Add(client);
-        return Task.FromResult(true);
+        _dbConnectionFactory = dbConnectionFactory;
     }
 
-    public Task<Client?> GetByIdAsync(Guid id)
+    public async Task<bool> CreateAsync(Client client)
     {
-        var client = _clients.FirstOrDefault(c => c.Id == id);
-        return Task.FromResult(client);
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+        using var transaction = connection.BeginTransaction();
+
+        var result = await connection.ExecuteAsync(new CommandDefinition(
+            """
+            insert into clients (id, name, slug)
+            values (@Id, @Name, @Slug)
+            """, client));
+        transaction.Commit();
+
+        return result > 0;
     }
 
-    public Task<Client?> GetBySlugAsync(string slug)
+    public async Task<Client?> GetByIdAsync(Guid id)
     {
-        var client = _clients.FirstOrDefault(c => c.Slug == slug);
-        return Task.FromResult(client);
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+
+        var client = await connection.QuerySingleOrDefaultAsync<Client>(
+            new CommandDefinition(
+                """
+                select * from clients where id = @id
+                """, new { id }));
+
+        return client;
     }
 
-    public Task<IEnumerable<Client>> GetAllAsync()
+    public async Task<Client?> GetBySlugAsync(string slug)
     {
-        return Task.FromResult<IEnumerable<Client>>(_clients);
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+
+        var client = await connection.QuerySingleOrDefaultAsync<Client>(
+            new CommandDefinition(
+                """
+                select * from clients where slug = @slug
+                """, new { slug }));
+
+        return client;
     }
 
-    public Task<bool> UpdateAsync(Client client)
+    public async Task<IEnumerable<Client>> GetAllAsync()
     {
-        var idx = _clients.FindIndex(c => c.Id == client.Id);
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
-        if (idx < 0)
-        {
-            return Task.FromResult(false);
-        }
+        var results = await connection.QueryAsync<Client>(
+            new CommandDefinition(
+                """
+                select *
+                from clients
+                """));
 
-        _clients[idx] = client;
-        return Task.FromResult(true);
+        return results;
     }
 
-    public Task<bool> DeleteByIdAsync(Guid id)
+    public async Task<bool> UpdateAsync(Client client)
     {
-        var removed = _clients.RemoveAll(c => c.Id == id) > 0;
-        return Task.FromResult(removed);
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+        using var transaction = connection.BeginTransaction();
+
+        var result = await connection.ExecuteAsync(new CommandDefinition(
+            """
+            update clients set name = @Name, slug = @Slug
+            where id = @Id
+            """, client));
+
+        transaction.Commit();
+
+        return result > 0;
+    }
+
+    public async Task<bool> DeleteByIdAsync(Guid id)
+    {
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+        using var transaction = connection.BeginTransaction();
+
+        var result = await connection.ExecuteAsync(new CommandDefinition(
+            """
+            delete from clients where id = @id
+            """, new { id }));
+
+        transaction.Commit();
+
+        return result > 0;
+    }
+
+    public async Task<bool> ExistsByIdAsync(Guid id)
+    {
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+
+        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
+            """
+            select count(1) from clients where id = @id
+            """, new { id }));
     }
 }

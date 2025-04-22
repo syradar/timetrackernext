@@ -1,8 +1,8 @@
 using TimeTracking.Application.Models;
 
-namespace TimeTracking.Application.Repositories;
+namespace TimeTracking.Application.Services;
 
-public interface IClientRepository
+public interface IClientService
 {
     Task<bool> CreateAsync(Client client);
 
@@ -12,9 +12,7 @@ public interface IClientRepository
 
     Task<IEnumerable<Client>> GetAllAsync();
 
-    Task<bool> UpdateAsync(Client client);
+    Task<Client?> UpdateAsync(Client client);
 
     Task<bool> DeleteByIdAsync(Guid id);
-
-    Task<bool> ExistsByIdAsync(Guid id);
 }

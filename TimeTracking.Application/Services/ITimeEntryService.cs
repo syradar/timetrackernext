@@ -1,8 +1,8 @@
 using TimeTracking.Application.Models;
 
-namespace TimeTracking.Application.Repositories;
+namespace TimeTracking.Application.Services;
 
-public interface ITimeEntryRepository
+public interface ITimeEntryService
 {
     Task<bool> CreateAsync(TimeEntry entry);
 
@@ -10,9 +10,7 @@ public interface ITimeEntryRepository
 
     Task<IEnumerable<TimeEntry>> GetAllAsync();
 
-    Task<bool> UpdateAsync(TimeEntry entry);
+    Task<TimeEntry?> UpdateAsync(TimeEntry entry);
 
     Task<bool> DeleteByIdAsync(Guid id);
-
-    Task<bool> ExistsByIdAsync(Guid id);
 }
