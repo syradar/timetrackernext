@@ -1,7 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using TimeTracking.API;
+using TimeTracking.API.Auth;
 using TimeTracking.API.Mapping;
 using TimeTracking.Application;
 using TimeTracking.Application.Database;

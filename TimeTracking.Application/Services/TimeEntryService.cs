@@ -6,13 +6,16 @@ namespace TimeTracking.Application.Services;
 
 public class TimeEntryService : ITimeEntryService
 {
+    private readonly IBookmarkRepository _bookmarkRepository;
     private readonly ITimeEntryRepository _timeEntryRepository;
     private readonly IValidator<TimeEntry> _timeEntryValidator;
 
-    public TimeEntryService(ITimeEntryRepository timeEntryRepository, IValidator<TimeEntry> timeEntryValidator)
+    public TimeEntryService(ITimeEntryRepository timeEntryRepository, IValidator<TimeEntry> timeEntryValidator,
+        IBookmarkRepository bookmarkRepository)
     {
         _timeEntryRepository = timeEntryRepository;
         _timeEntryValidator = timeEntryValidator;
+        _bookmarkRepository = bookmarkRepository;
     }
 
     public async Task<bool> CreateAsync(TimeEntry entry, CancellationToken token = default)
@@ -21,12 +24,13 @@ public class TimeEntryService : ITimeEntryService
         return await _timeEntryRepository.CreateAsync(entry, token);
     }
 
-    public Task<TimeEntry?> GetByIdAsync(Guid id, CancellationToken token = default)
+    public Task<TimeEntry?> GetByIdAsync(Guid id, Guid? userId = default, CancellationToken token = default)
     {
-        return _timeEntryRepository.GetByIdAsync(id, token);
+        return _timeEntryRepository.GetByIdAsync(id, userId, token);
     }
 
-    public async Task<TimeEntry?> UpdateAsync(TimeEntry entry, CancellationToken token = default)
+    public async Task<TimeEntry?> UpdateAsync(TimeEntry entry, Guid? userId = default,
+        CancellationToken token = default)
     {
         await _timeEntryValidator.ValidateAndThrowAsync(entry, token);
         var timeEntryExists = await _timeEntryRepository.ExistsByIdAsync(entry.Id, token);
@@ -37,6 +41,18 @@ public class TimeEntryService : ITimeEntryService
         }
 
         await _timeEntryRepository.UpdateAsync(entry, token);
+
+        if (!userId.HasValue)
+        {
+            var bookmarkCount = await _bookmarkRepository.GetBookmarkCountAsync(entry.Id, token);
+            entry.BookmarkCount = bookmarkCount;
+            return entry;
+        }
+
+        var bookmarks = await _bookmarkRepository.GetBookmarkAsync(entry.Id, userId.Value, token);
+        entry.BookmarkCount = bookmarks.BookmarkCount;
+        entry.IsBookmarkedByCurrentUser = bookmarks.IsBookmarkedByCurrentUser;
+
         return entry;
     }
 
@@ -45,8 +61,8 @@ public class TimeEntryService : ITimeEntryService
         return _timeEntryRepository.DeleteByIdAsync(id, token);
     }
 
-    public Task<IEnumerable<TimeEntry>> GetAllAsync(CancellationToken token = default)
+    public Task<IEnumerable<TimeEntry>> GetAllAsync(Guid? userId = default, CancellationToken token = default)
     {
-        return _timeEntryRepository.GetAllAsync(token);
+        return _timeEntryRepository.GetAllAsync(userId, token);
     }
 }

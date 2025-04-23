@@ -6,9 +6,9 @@ public interface ITimeEntryRepository
 {
     Task<bool> CreateAsync(TimeEntry entry, CancellationToken token = default);
 
-    Task<TimeEntry?> GetByIdAsync(Guid id, CancellationToken token = default);
+    Task<TimeEntry?> GetByIdAsync(Guid id, Guid? userId = default, CancellationToken token = default);
 
-    Task<IEnumerable<TimeEntry>> GetAllAsync(CancellationToken token = default);
+    Task<IEnumerable<TimeEntry>> GetAllAsync(Guid? userId = default, CancellationToken token = default);
 
     Task<bool> UpdateAsync(TimeEntry entry, CancellationToken token = default);
 

@@ -41,28 +41,58 @@ public class TimeEntryRepository : ITimeEntryRepository
         return result > 0;
     }
 
-    public async Task<TimeEntry?> GetByIdAsync(Guid id, CancellationToken token = default)
+    public async Task<TimeEntry?> GetByIdAsync(Guid id, Guid? userId = default, CancellationToken token = default)
     {
         using var connection = await _dbConnectionFactory.CreateConnectionAsync(token);
 
-        var timeEntry = await connection.QuerySingleOrDefaultAsync<TimeEntry>(
+        var timeEntryRaw = await connection.QuerySingleOrDefaultAsync<TimeEntryRaw>(
             new CommandDefinition(
                 """
-                select * from time_entries where id = @id
-                """, new { id }, cancellationToken: token));
+                select 
+                    te.id,
+                    te.description,
+                    te.date,
+                    te.hours,
+                   -- comments
+                (
+                    select string_agg(c.comment, ',') 
+                    from comments c
+                    where c.timeEntryId = te.id
+                ) as comments,
+                -- bookmark count
+                (
+                    select count(*)
+                    from bookmarks b
+                    where b.timeEntryId = te.id
+                ) as bookmarkcount,
+                -- is bookmarked by the current user
+                exists (
+                    select 1 
+                    from bookmarks b2
+                    where b2.timeEntryId = te.id 
+                        and b2.userid = @userId
+                ) as isbookmarkedbycurrentuser
+                from time_entries te 
+                where te.id = @id
+                """, new { id, userId }, cancellationToken: token));
 
-        if (timeEntry is null)
+        if (timeEntryRaw is null)
         {
             return null;
         }
 
-        var comments = await connection.QueryAsync<string>(
-            new CommandDefinition(
-                """
-                select comment from comments where timeEntryId = @id
-                """, new { id }, cancellationToken: token));
-
-        timeEntry.Comments.AddRange(comments);
+        var timeEntry = new TimeEntry
+        {
+            Id = timeEntryRaw.id,
+            Description = timeEntryRaw.description,
+            Hours = timeEntryRaw.hours,
+            Date = timeEntryRaw.date,
+            Comments = string.IsNullOrWhiteSpace(timeEntryRaw.comments)
+                ? []
+                : timeEntryRaw.comments.Split(',').ToList(),
+            BookmarkCount = timeEntryRaw.bookmarkcount,
+            IsBookmarkedByCurrentUser = timeEntryRaw.isbookmarkedbycurrentuser,
+        };
 
         return timeEntry;
     }
@@ -101,7 +131,6 @@ public class TimeEntryRepository : ITimeEntryRepository
         using var connection = await _dbConnectionFactory.CreateConnectionAsync(token);
         using var transaction = connection.BeginTransaction();
 
-
         await connection.ExecuteAsync(new CommandDefinition(
             """
             delete from comments where timeEntryId = @id
@@ -123,29 +152,74 @@ public class TimeEntryRepository : ITimeEntryRepository
 
         return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
             """
-            select count(1) from time_entries where id = @id
+            select count(1)
+            from time_entries 
+            where id = @id
             """, new { id }, cancellationToken: token));
     }
 
-    public async Task<IEnumerable<TimeEntry>> GetAllAsync(CancellationToken token = default)
+    public async Task<IEnumerable<TimeEntry>> GetAllAsync(Guid? userId = default, CancellationToken token = default)
     {
         using var connection = await _dbConnectionFactory.CreateConnectionAsync(token);
 
-        var results = await connection.QueryAsync(
+        var results = await connection.QueryAsync<TimeEntryRaw>(
             new CommandDefinition(
                 """
-                select te.*, string_agg(c.comment, ',') as comments
-                from time_entries te left join comments c on te.id = c.timeEntryId
-                group by id
-                """, cancellationToken: token));
+                select 
+                    te.id, 
+                    te.description, 
+                    te.hours, 
+                    te.date, 
+                    -- comments
+                    (
+                        select string_agg(c.comment, ',') 
+                        from comments c
+                        where c.timeEntryId = te.id
+                    ) as comments,
+                    -- bookmark count
+                    (
+                        select count(*)
+                        from bookmarks b
+                        where b.timeEntryId = te.id
+                    ) as bookmarkcount,
+                    -- is bookmarked by the current user
+                    exists (
+                        select 1 
+                        from bookmarks b2
+                        where b2.timeEntryId = te.id 
+                            and b2.userid = @userId
+                    ) as isbookmarkedbycurrentuser
+                from time_entries te 
+                """, new { userId }, cancellationToken: token));
 
         return results.Select(x => new TimeEntry
         {
             Id = x.id,
             Description = x.description,
             Hours = x.hours,
-            Comments = Enumerable.ToList(x.comments.Split(',')),
             Date = x.date,
+            Comments = string.IsNullOrWhiteSpace(x.comments)
+                ? []
+                : x.comments.Split(',').ToList(),
+            BookmarkCount = x.bookmarkcount,
+            IsBookmarkedByCurrentUser = x.isbookmarkedbycurrentuser,
         });
     }
+}
+
+internal class TimeEntryRaw
+{
+    public Guid id { get; init; }
+
+    public string description { get; init; }
+
+    public DateTime date { get; init; }
+
+    public decimal hours { get; init; }
+
+    public string? comments { get; init; }
+
+    public int bookmarkcount { get; init; }
+
+    public bool isbookmarkedbycurrentuser { get; init; }
 }

@@ -14,6 +14,8 @@ public static class ApplicationServiceCollectionExtensions
         services.AddSingleton<ITimeEntryService, TimeEntryService>();
         services.AddSingleton<IClientRepository, ClientRepository>();
         services.AddSingleton<IClientService, ClientService>();
+        services.AddSingleton<IBookmarkRepository, BookmarkRepository>();
+        services.AddSingleton<IBookmarkService, BookmarkService>();
 
         services.AddValidatorsFromAssemblyContaining<IApplicationMarker>(ServiceLifetime.Singleton);
 

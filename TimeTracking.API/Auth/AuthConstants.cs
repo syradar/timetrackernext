@@ -1,4 +1,4 @@
-namespace TimeTracking.API;
+namespace TimeTracking.API.Auth;
 
 public static class AuthConstants
 {

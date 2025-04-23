@@ -11,4 +11,8 @@ public class TimeEntryResponse
     public required decimal Hours { get; init; }
 
     public required IEnumerable<string> Comments { get; init; } = [];
+
+    public int? BookmarkCount { get; init; }
+
+    public bool? IsBookmarked { get; init; }
 }

@@ -11,4 +11,8 @@ public class TimeEntry
     public required decimal Hours { get; set; }
 
     public required List<string> Comments { get; init; } = [];
+
+    public int? BookmarkCount { get; set; }
+
+    public bool? IsBookmarkedByCurrentUser { get; set; }
 }

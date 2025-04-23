@@ -20,7 +20,7 @@ public class DbInitializer
             create table if not exists time_entries (
             id uuid primary key,
             description text not null,
-            date timestamp not null,
+            date timestamptz not null default now(),
             hours decimal not null);
             """);
 
@@ -45,6 +45,15 @@ public class DbInitializer
             create table if not exists comments (
             timeEntryId uuid references time_entries(id),
             comment text not null);
+            """);
+
+        await connection.ExecuteAsync(
+            """
+            create table if not exists bookmarks (
+            userid uuid,
+            timeEntryId uuid references time_entries(id),
+            created_at timestamptz not null default now(),
+            primary key (userid, timeEntryId));
             """);
     }
 }

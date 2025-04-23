@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TimeTracking.API.Auth;
 using TimeTracking.API.Mapping;
 using TimeTracking.Application.Services;
 using TimeTracking.Contracts.Requests;
@@ -30,7 +31,8 @@ public class TimeEntriesController : ControllerBase
     [HttpGet(ApiEndpoints.TimeEntries.Get)]
     public async Task<IActionResult> Get([FromRoute] Guid id, CancellationToken token)
     {
-        var timeEntry = await _timeEntryService.GetByIdAsync(id, token);
+        var usedId = HttpContext.GetUserId();
+        var timeEntry = await _timeEntryService.GetByIdAsync(id, usedId, token);
 
         if (timeEntry is null)
         {
@@ -44,7 +46,8 @@ public class TimeEntriesController : ControllerBase
     [HttpGet(ApiEndpoints.TimeEntries.GetAll)]
     public async Task<IActionResult> GetAll(CancellationToken token)
     {
-        var timeEntries = await _timeEntryService.GetAllAsync(token);
+        var userId = HttpContext.GetUserId();
+        var timeEntries = await _timeEntryService.GetAllAsync(userId, token);
         var response = timeEntries.MapToResponse();
         return Ok(response);
     }
@@ -54,9 +57,11 @@ public class TimeEntriesController : ControllerBase
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateTimeEntryRequest request,
         CancellationToken token)
     {
+        var userId = HttpContext.GetUserId();
+
         var timeEntry = request.MapToTimeEntry(id);
 
-        var updatedTimeEntry = await _timeEntryService.UpdateAsync(timeEntry, token);
+        var updatedTimeEntry = await _timeEntryService.UpdateAsync(timeEntry, userId, token);
 
         if (updatedTimeEntry is null)
         {

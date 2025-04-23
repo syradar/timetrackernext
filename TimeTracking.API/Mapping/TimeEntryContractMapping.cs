@@ -39,6 +39,8 @@ public static partial class TimeEntryContractMapping
             Hours = entry.Hours,
             Comments = entry.Comments,
             Date = entry.Date,
+            BookmarkCount = entry.BookmarkCount,
+            IsBookmarked = entry.IsBookmarkedByCurrentUser,
         };
     }
 

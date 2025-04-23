@@ -17,6 +17,17 @@ public static class ApiEndpoints
         public const string Update = $"{Base}/{{id:guid}}";
 
         public const string Delete = $"{Base}/{{id:guid}}";
+
+        public const string Bookmark = $"{Base}/{{id:guid}}/bookmarks";
+
+        public const string DeleteBookmark = $"{Base}/{{id:guid}}/bookmarks";
+    }
+
+    public static class Bookmarks
+    {
+        private const string Base = $"{ApiBase}/bookmarks";
+
+        public const string GetUserBookmarks = $"{Base}/me";
     }
 
     public static class Clients
