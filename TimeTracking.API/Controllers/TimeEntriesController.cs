@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TimeTracking.API.Mapping;
 using TimeTracking.Application.Services;
@@ -15,6 +16,7 @@ public class TimeEntriesController : ControllerBase
         _timeEntryService = timeEntryService;
     }
 
+    [Authorize(AuthConstants.TrustedUserPolicyName)]
     [HttpPost(ApiEndpoints.TimeEntries.Create)]
     public async Task<IActionResult> Create([FromBody] CreateTimeEntryRequest request, CancellationToken token)
     {
@@ -47,6 +49,7 @@ public class TimeEntriesController : ControllerBase
         return Ok(response);
     }
 
+    [Authorize(AuthConstants.TrustedUserPolicyName)]
     [HttpPut(ApiEndpoints.TimeEntries.Update)]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateTimeEntryRequest request,
         CancellationToken token)
@@ -65,6 +68,7 @@ public class TimeEntriesController : ControllerBase
         return Ok(response);
     }
 
+    [Authorize(AuthConstants.AdminUserPolicyName)]
     [HttpDelete(ApiEndpoints.TimeEntries.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken token)
     {

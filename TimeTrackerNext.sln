@@ -17,10 +17,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reporting.Contracts", "Reporting.Contracts\Reporting.Contracts.csproj", "{90134E44-BAEB-4C70-919F-D361AF0CF0B2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{16BAA90C-DC58-4D75-8132-15D46D53ED7E}"
-	ProjectSection(SolutionItems) = preProject
-		compose.yaml = compose.yaml
-	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Indentity", "Indentity", "{800A1389-0E91-4901-ADC0-39A178A5696B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Identity.Api", "Identity.Api\Identity.Api.csproj", "{C1018087-7562-410E-B7EB-6ADA5D8131A3}"
+EndProject
+
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{90134E44-BAEB-4C70-919F-D361AF0CF0B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{90134E44-BAEB-4C70-919F-D361AF0CF0B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{90134E44-BAEB-4C70-919F-D361AF0CF0B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1018087-7562-410E-B7EB-6ADA5D8131A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1018087-7562-410E-B7EB-6ADA5D8131A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1018087-7562-410E-B7EB-6ADA5D8131A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1018087-7562-410E-B7EB-6ADA5D8131A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A8CE468D-09C2-48C1-B7D0-CF66858E01CC} = {2D4E204C-0A11-4159-B25D-6A4663C06E17}
@@ -59,5 +65,6 @@ Global
 		{BE01D7D1-20AE-431C-81A8-BCFBDDFF1A7D} = {B028967D-98FD-4C5D-8332-7DF18EC28609}
 		{61B90C64-162C-4452-9256-6D637177C405} = {B028967D-98FD-4C5D-8332-7DF18EC28609}
 		{90134E44-BAEB-4C70-919F-D361AF0CF0B2} = {B028967D-98FD-4C5D-8332-7DF18EC28609}
+		{C1018087-7562-410E-B7EB-6ADA5D8131A3} = {800A1389-0E91-4901-ADC0-39A178A5696B}
 	EndGlobalSection
 EndGlobal

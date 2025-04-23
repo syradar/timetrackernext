@@ -1,0 +1,23 @@
+meta {
+  name: Token
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://localhost:5003/token
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "user":"David",
+    "email": "david@davidbrandt.se",
+    "customClaims": {
+      "admin": false,
+      "trusted_user": true,
+      "trustedUser": true
+    }
+  }
+}

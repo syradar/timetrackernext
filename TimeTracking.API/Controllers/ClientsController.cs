@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TimeTracking.API.Mapping;
 using TimeTracking.Application.Services;
@@ -6,6 +7,7 @@ using TimeTracking.Contracts.Requests;
 namespace TimeTracking.API.Controllers;
 
 [ApiController]
+[Authorize]
 public class ClientsController : ControllerBase
 {
     private readonly IClientService _clientService;
