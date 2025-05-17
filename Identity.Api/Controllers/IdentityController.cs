@@ -28,7 +28,7 @@ public class IdentityController : ControllerBase
             new("userid", request.UserId.ToString()),
         };
 
-        foreach (var claimPair in request.CustomClaims)
+        var customClaims = request.CustomClaims.Select(claimPair =>
         {
             var jsonElement = (JsonElement)claimPair.Value;
 
@@ -41,8 +41,9 @@ public class IdentityController : ControllerBase
             };
 
             var claim = new Claim(claimPair.Key, claimPair.Value.ToString()!, valueType);
-            claims.Add(claim);
-        }
+            return claim;
+        });
+        claims.AddRange(customClaims);
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {

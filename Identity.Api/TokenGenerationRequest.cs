@@ -2,9 +2,9 @@
 
 public class TokenGenerationRequest
 {
-    public Guid UserId { get; set; }
+    public Guid UserId { get; init; }
     
-    public string Email { get; set; }
+    public required string Email { get; init; }
 
-    public Dictionary<string, object> CustomClaims { get; set; } = new();
+    public Dictionary<string, object> CustomClaims { get; init; }
 }

@@ -1,0 +1,17 @@
+meta {
+  name: Upsert Bookmark
+  type: http
+  seq: 2
+}
+
+put {
+  url: https://localhost:7228/api/time-entries/41657292-814d-471a-a8d4-69bb937ac942/bookmarks
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "bookmark": true
+  }
+}

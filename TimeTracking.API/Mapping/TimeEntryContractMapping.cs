@@ -51,4 +51,10 @@ public static partial class TimeEntryContractMapping
             Items = entries.Select(x => x.MapToResponse()),
         };
     }
+
+    public static IEnumerable<TimeEntryBookmarkResponse> MapToResponse(this IEnumerable<TimeEntryBookmark> bookmarks)
+    {
+        return bookmarks.Select(x => new TimeEntryBookmarkResponse(x.TimeEntryId));
+    }
+    
 }

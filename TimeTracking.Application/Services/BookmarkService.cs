@@ -1,3 +1,4 @@
+using TimeTracking.Application.Models;
 using TimeTracking.Application.Repositories;
 
 namespace TimeTracking.Application.Services;
@@ -13,20 +14,9 @@ public class BookmarkService : IBookmarkService
         _timeEntryRepository = timeEntryRepository;
     }
 
-    public async Task<bool> BookmarkTimeEntryAsync(Guid userId, bool bookmark, Guid timeEntryId,
+    public async Task<bool> BookmarkTimeEntryAsync(Guid timeEntryId, Guid userId, bool bookmark,
         CancellationToken token = default)
     {
-        // if (!bookmark)
-        // {
-        //     throw new ValidationException([
-        //         new ValidationFailure
-        //         {
-        //             PropertyName = "Bookmark",
-        //             ErrorMessage = "You can't unbookmark a time entry",
-        //         },
-        //     ]);
-        // }
-
         var timeEntryExists = await _timeEntryRepository.ExistsByIdAsync(timeEntryId, token);
 
         if (!timeEntryExists)
@@ -36,15 +26,20 @@ public class BookmarkService : IBookmarkService
 
         var result = await _bookmarkRepository.BookmarkTimeEntryAsync(
             timeEntryId,
-            bookmark,
             userId,
+            bookmark,
             token);
 
-        if (!bookmark)
-        {
-            return result;
-        }
-
         return result;
+    }
+
+    public Task<bool> DeleteBookmarkAsync(Guid timeEntryId, Guid userId, CancellationToken token = default)
+    {
+        return _bookmarkRepository.DeleteBookmarkAsync(timeEntryId, userId, token);
+    }
+
+    public Task<IEnumerable<TimeEntryBookmark>> GetBookmarksForUserAsync(Guid userId, CancellationToken token = default)
+    {
+        return _bookmarkRepository.GetBookmarksForUserAsync(userId, token);
     }
 }

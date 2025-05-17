@@ -1,5 +1,6 @@
 using Dapper;
 using TimeTracking.Application.Database;
+using TimeTracking.Application.Models;
 
 namespace TimeTracking.Application.Repositories;
 
@@ -48,7 +49,37 @@ public class BookmarkRepository : IBookmarkRepository
             """, new { timeEntryId, userId }, cancellationToken: token));
     }
 
-    public async Task<bool> BookmarkTimeEntryAsync(Guid timeEntryId, bool bookmark, Guid userId,
+    public async Task<bool> DeleteBookmarkAsync(Guid timeEntryId, Guid userId, CancellationToken token = default)
+    {
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync(token);
+
+        var result = await connection.ExecuteAsync(new CommandDefinition("""
+                                                                         delete from bookmarks
+                                                                         where timeEntryId = @timeEntryId 
+                                                                             and userid = @userId
+                                                                         """, new { timeEntryId, userId },
+            cancellationToken: token));
+
+        return result > 0;
+    }
+
+    public async Task<IEnumerable<TimeEntryBookmark>> GetBookmarksForUserAsync(Guid userId, CancellationToken token = default)
+    {
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync(token);
+        
+        var results = await connection.QueryAsync<TimeEntryBookmark>(new CommandDefinition(
+            """
+            select 
+                b.timeEntryId
+            from bookmarks b
+            inner join time_entries te on b.timeEntryId = te.id
+            where b.userid = @userId
+            """, new { userId }, cancellationToken: token));
+        
+        return results;
+    }
+
+    public async Task<bool> BookmarkTimeEntryAsync(Guid timeEntryId, Guid userId, bool bookmark,
         CancellationToken token = default)
     {
         using var connection = await _dbConnectionFactory.CreateConnectionAsync(token);
